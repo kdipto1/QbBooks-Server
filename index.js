@@ -21,18 +21,26 @@ async function run() {
   try {
     await client.connect();
     const booksCollection = client.db("qbBooks").collection("books");
-    //post item in database
+    /* Api for getting jwt token */
+    app.post("/login", async (req, res) => {
+      const email = req.body;
+      const token = await jwt.sign(email, process.env.ACCESS_TOKEN_SECRET);
+      res.send({ token: token });
+    });
+    //Api for posting new book
     app.post("/book", async (req, res) => {
       const newBook = req.body;
       const result = await booksCollection.insertOne(newBook);
       res.send(result);
     })
+    //Api for posting many books
     app.post("/books", async (req, res) => {
       const newBooks = req.body;
       const options = { ordered: true };
       const result = await booksCollection.insertMany(newBooks,options);
       res.send(result);
     })
+    // Api for getting books for featured section
     app.get("/featuredBooks", async (req, res) => {
       const query = {}
       const cursor =  booksCollection.find(query, { limit: 6 })
