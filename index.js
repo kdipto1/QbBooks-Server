@@ -27,6 +27,18 @@ async function run() {
       const result = await booksCollection.insertOne(newBook);
       res.send(result);
     })
+    app.post("/books", async (req, res) => {
+      const newBooks = req.body;
+      const options = { ordered: true };
+      const result = await booksCollection.insertMany(newBooks,options);
+      res.send(result);
+    })
+    app.get("/featuredBooks", async (req, res) => {
+      const query = {}
+      const cursor =  booksCollection.find(query, { limit: 6 })
+      const result = await cursor.toArray();
+      res.send(result)
+    })
   } finally {
   }
 }
