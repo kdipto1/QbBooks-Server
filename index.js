@@ -22,12 +22,13 @@ async function run() {
     await client.connect();
     const booksCollection = client.db("qbBooks").collection("books");
     const userCollection = client.db("qbBooks").collection("users");
-    const testCollection = client.db("qbBooks").collection("test");
+    const cartCollection = client.db("qbBooks").collection("cart");
+    // const testCollection = client.db("qbBooks").collection("test");
 
     //Api for book posting test
-    app.post("/test", async (req, res) => {
+    app.post("/addBook", async (req, res) => {
       const newBook = req.body;
-      const result = await testCollection.insertOne(newBook);
+      const result = await booksCollection.insertOne(newBook);
       res.send(result);
     });
     /* Api for getting jwt token */
@@ -52,7 +53,7 @@ async function run() {
     // Api for getting books for featured section
     app.get("/featuredBooks", async (req, res) => {
       const query = {};
-      const cursor = booksCollection.find(query, { limit: 6 });
+      const cursor = booksCollection.find(query, { limit: 8 });
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -83,6 +84,19 @@ async function run() {
       } else {
         res.send({ message: "Account available" });
       }
+    });
+    //Api for getting user by email
+    app.get("/users", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+    //Api for posting product to cart
+    app.post("/cart", async (req, res) => {
+      const newProduct = req.body;
+      const result = await cartCollection.insertOne(newProduct);
+      res.send(result);
     });
   } finally {
   }
