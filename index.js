@@ -57,6 +57,22 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    // Api for getting all book or category book
+    app.get("/allBooks", async (req, res) => {
+      const query = {};
+      const cursor = booksCollection.find(query);
+      const result = await (await cursor.toArray()).reverse();
+      res.send(result);
+    });
+    // Api for getting category book
+    app.get("/category", async (req, res) => {
+      const category = req.query.category;
+      const query = { category: category };
+      // console.log(category);
+      const cursor = booksCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
     //Api for getting single book
     app.get("/book/:id", async (req, res) => {
       const { id } = req.params;
@@ -92,11 +108,55 @@ async function run() {
       const result = await userCollection.findOne(query);
       res.send(result);
     });
+    //Api for updating user info
+    app.put("/users/:id", async (req, res) => {
+      const { id } = req.params;
+      const data = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = { $set: data };
+      const option = { upsert: true };
+      const result = await userCollection.updateOne(filter, updateDoc, option);
+      res.send(result);
+    });
     //Api for posting product to cart
     app.post("/cart", async (req, res) => {
       const newProduct = req.body;
       const result = await cartCollection.insertOne(newProduct);
       res.send(result);
+    });
+    //Api for getting user added product from cart
+    app.get("/userCart", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const cursor = cartCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+      // console.log(result);
+    });
+    //Api for getting books by id
+    app.get("/cartBooks/:id", async (req, res) => {
+      const id = req.params;
+      console.log(id);
+      const bookData = req.body;
+      // console.log(bookData,"body");
+      const books = req.query;
+      console.log(typeof books, "Params:", books);
+      const arr = Object.entries(books);
+      // const result = booksCollection.find({
+      //   _id: {
+      //     $in: [ObjectId(books)],
+      //   },
+      // });
+      // res.send(result);
+      // for (const id of books) {
+      //   let result = [];
+      //   let id = await booksCollection.find({ _id: ObjectId(id) });
+      //   result.push(id);
+      //   res.send(result);
+      // }
+      console.log("cc", Object.values(books));
+      // const query = { _id: ObjectId(id) };
+      // const result = await booksCollection.find(query);
     });
   } finally {
   }
