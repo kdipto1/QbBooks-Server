@@ -47,7 +47,7 @@ async function run() {
       const order = req.body;
       // const price = req?.query.totalPrice;
       const price = parseInt(order.totalPrice);
-      console.log(parseFloat(order.totalPrice), "clg");
+      // console.log(parseFloat(order.totalPrice), "clg");
       const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
