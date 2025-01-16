@@ -19,10 +19,21 @@ const cors_1 = __importDefault(require("cors"));
 require("dotenv").config();
 const app = (0, express_1.default)();
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const axios_1 = __importDefault(require("axios"));
+const node_cron_1 = __importDefault(require("node-cron"));
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 //middleware
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+node_cron_1.default.schedule("*/10 * * * *", () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield axios_1.default.get("https://qbbooks.onrender.com");
+        console.log("Server pinged successfully");
+    }
+    catch (error) {
+        console.error("Error pinging server:", error);
+    }
+}));
 //Verify token function:
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
