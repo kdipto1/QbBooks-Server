@@ -6,20 +6,22 @@ require("dotenv").config();
 const app = express();
 import jwt from "jsonwebtoken";
 import axios from "axios";
-import cron from "node-cron";
+import { CronJob } from "cron";
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 //middleware
 app.use(cors());
 app.use(express.json());
 
-cron.schedule("*/10 * * * *", async () => {
+const job = new CronJob("*/10 * * * *", async () => {
   try {
-    const response = await axios.get("https://qbbooks.onrender.com");
+    await axios.get("https://qbbooks.onrender.com");
     console.log("Server pinged successfully");
   } catch (error) {
     console.error("Error pinging server:", error);
   }
 });
+
+job.start();
 
 //Verify token function:
 function verifyJWT(req: Request, res: Response, next: NextFunction) {
