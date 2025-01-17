@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const job = new CronJob("*/14 * * * *", async () => {
+const job = new CronJob("*/12 * * * *", async () => {
   try {
     await axios.get(process.env.PING_URL as string, { timeout: 30000 });
     console.log("URL pinged successfully");
