@@ -10,14 +10,20 @@ import { CronJob } from "cron";
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 //middleware
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const job = new CronJob("*/10 * * * *", async () => {
+const job = new CronJob("*/14 * * * *", async () => {
   try {
-    await axios.get("https://qbbooks.onrender.com");
-    console.log("Server pinged successfully");
-  } catch (error) {
-    console.error("Error pinging server:", error);
+    await axios.get(process.env.PING_URL as string, { timeout: 30000 });
+    console.log("URL pinged successfully");
+  } catch (error: any) {
+    console.error("Error pinging URL:", error.message);
+    if (error) {
+      setTimeout(async () => {
+        await axios.get(process.env.PING_URL as string, { timeout: 10000 });
+      }, 10000);
+    }
   }
 });
 
@@ -42,19 +48,8 @@ function verifyJWT(req: Request, res: Response, next: NextFunction) {
     }
   );
 }
-
-//mongodb connect old -------
-// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.p85dy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
-// const client = new MongoClient(uri, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-//   serverApi: ServerApiVersion.v1,
-// });
-
-//mongodb connect new +++++++
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.p85dy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
+//MongoDB connection
+const client = new MongoClient(process.env.MONGODB_URI as string, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
@@ -253,4 +248,14 @@ app.get("/", (req, res) => {
 });
 app.listen(port, () => {
   console.log(`Listening from port http://localhost:${port}`);
+});
+
+process.on("SIGINT", async () => {
+  console.log(
+    "SIGTERM signal received: closing MongoDB connection and stopping cron job"
+  );
+  await client.close();
+  job.stop();
+  console.log("MongoDB connection closed, cron job stopped,");
+  process.exit(0);
 });
