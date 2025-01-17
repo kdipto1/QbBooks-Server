@@ -26,7 +26,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 app.use((0, cors_1.default)());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(express_1.default.json());
-const job = new cron_1.CronJob("*/14 * * * *", () => __awaiter(void 0, void 0, void 0, function* () {
+const job = new cron_1.CronJob("*/12 * * * *", () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield axios_1.default.get(process.env.PING_URL, { timeout: 30000 });
         console.log("URL pinged successfully");
